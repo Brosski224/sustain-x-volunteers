@@ -18,14 +18,16 @@ import { User } from "@/lib/models/user";
 import { Leaderboard } from "@/lib/models/leaderboard";
 import { hashPassword, generateReferralCode } from "@/lib/auth";
 import { ApiResponse } from "@/types/api";
+import { hash } from "bcryptjs";
+import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
-    
+    console.log("Connected to database");
+
     const { name, email, department, section, password } = await req.json();
-    
-    // Validate required fields
+
     if (!name || !email || !department || !section || !password) {
       return NextResponse.json<ApiResponse<never>>({ 
         error: "All fields are required" 
@@ -35,42 +37,28 @@ export async function POST(req: Request) {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json<ApiResponse<never>>({ 
-        error: "Email already exists" 
+        error: "User already exists" 
       }, { status: 400 });
     }
 
-    const hashedPassword = await hashPassword(password);
-    const referralCode = generateReferralCode();
+    const hashedPassword = await hash(password, 12);
+    const referralCode = `IGBC${uuidv4().split("-")[0]}`;
 
-    const session = await User.startSession();
-    try {
-      await session.startTransaction();
+    const user = new User({
+      name,
+      email,
+      department,
+      section,
+      password: hashedPassword,
+      referralCode,
+    });
 
-      const user = await User.create([{
-        name,
-        email,
-        department,
-        section,
-        password: hashedPassword,
-        referralCode,
-      }], { session });
+    await user.save();
+    console.log("User created successfully");
 
-      await Leaderboard.create([{
-        userId: user[0]._id,
-        section,
-        points: 0,
-      }], { session });
-
-      await session.commitTransaction();
-      return NextResponse.json<ApiResponse<never>>({ 
-        message: "User created successfully" 
-      });
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      session.endSession();
-    }
+    return NextResponse.json<ApiResponse<never>>({ 
+      message: "User created successfully" 
+    });
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json<ApiResponse<never>>({ 

@@ -30,13 +30,7 @@ export function UserStats({ referralCode, emailCount }: UserStatsProps) {
           <p className="text-3xl font-bold">{emailCount}</p>
         </CardContent>
       </Card>
-      <Card className="md:col-span-2">
-        <CardContent className="pt-6">
-          <Button className="w-full" onClick={() => router.push("/dashboard/add-email")}>
-            Add Emails
-          </Button>
-        </CardContent>
-      </Card>
+
     </div>
   )
 }
