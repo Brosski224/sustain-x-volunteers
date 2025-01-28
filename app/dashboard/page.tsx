@@ -17,13 +17,13 @@ async function getUser() {
 }
 
 async function getLeaderboardData() {
-  const res = await fetch(`${process.env.VERCEL_URL}/api/leaderboard`, {
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/leaderboard`;
+  const res = await fetch(apiUrl, {
     cache: "no-store",
-  })
-  if (!res.ok) throw new Error("Failed to fetch leaderboard")
-  return res.json()
+  });
+  if (!res.ok) throw new Error("Failed to fetch leaderboard");
+  return res.json();
 }
-
 export default async function Dashboard() {
   const [user, leaderboardData] = await Promise.all([getUser(), getLeaderboardData()])
 
