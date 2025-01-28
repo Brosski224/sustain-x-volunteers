@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { User } from "@/lib/models/user";
 import { hash } from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import { ApiResponse } from "@/types/api";
 
 export async function POST(req: Request) {
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await hash(password, 12);
-    const referralCode = `IGBC${uuidv4().split("-")[0]}`;
+    const referralCode = `IGBC${randomUUID().split("-")[0]}`;
 
     const user = new User({
       name,
