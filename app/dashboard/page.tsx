@@ -1,34 +1,36 @@
-import { cookies } from "next/headers"
-import { jwtVerify } from "jose"
-import { UserStats } from "@/components/dashboard/user-stats"
-import { Leaderboard } from "@/components/dashboard/leaderboard"
-import { User } from "@/lib/models/user"
-import connectDB from "@/lib/db"
+import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
+import { UserStats } from "@/components/dashboard/user-stats";
+import { User } from "@/lib/models/user";
+// import { connectDB } from "@/lib/models/user";
 
 async function getUser() {
-  const token = cookies().get("auth-token")
-  if (!token) return null
+  const token = cookies().get("auth-token");
+  if (!token || !token.value) return null;
 
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!)
-  const { payload } = await jwtVerify(token.value, secret)
+  const secret = process.env.NEXTAUTH_SECRET
+    ? new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
+    : (() => {
+        throw new Error("NEXTAUTH_SECRET is not defined");
+      })();
 
-  await connectDB()
-  return User.findById(payload.userId)
+  const { payload } = await jwtVerify(token.value, secret);
+
+  await connectDB();
+  return User.findById(payload.userId);
 }
 
-async function getLeaderboardData() {
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/leaderboard`;
-  const res = await fetch(apiUrl, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Failed to fetch leaderboard");
-  return res.json();
-}
+
+
 export default async function Dashboard() {
-  const [user, leaderboardData] = await Promise.all([getUser(), getLeaderboardData()])
+  const [user] = await Promise.all([getUser()]);
 
   if (!user) {
-    return null
+    return (
+      <main className="container mx-auto p-4 space-y-8">
+        <h1 className="text-3xl font-bold">Unauthorized</h1>
+      </main>
+    );
   }
 
   return (
@@ -37,11 +39,22 @@ export default async function Dashboard() {
         <h1 className="text-3xl font-bold">Welcome, {user.name}</h1>
         <UserStats referralCode={user.referralCode} emailCount={user.emailCount} />
       </div>
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Leaderboard</h2>
-        <Leaderboard data={leaderboardData} />
-      </div>
+
     </main>
-  )
+  );
+}
+import mongoose from "mongoose";
+
+async function connectDB() {
+  if (mongoose.connection.readyState >= 1) {
+    return;
+  }
+
+  const mongoUri = process.env.MONGODB_URI;
+  if (!mongoUri) {
+    throw new Error("MONGODB_URI is not defined");
+  }
+
+  return mongoose.connect(mongoUri);
 }
 
