@@ -1,6 +1,6 @@
-import Link from "next/link"
-import { LoginForm } from "@/components/auth/login-form"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { LoginForm } from "@/components/auth/login-form";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -19,8 +19,12 @@ export default function Home() {
             </Button>
           </Link>
         </p>
+        <div className="text-center">
+          <Link href="/leaderboard">
+            <Button variant="primary">Show Leaderboard</Button>
+          </Link>
+        </div>
       </div>
     </main>
-  )
+  );
 }
-

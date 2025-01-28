@@ -5,14 +5,12 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     department: { type: String, required: true },
-    section: {
-      type: String,
-      required: true,
-      enum: ["Sponsorship", "Outreach", "Curation", "Event", "Ambience"],
-    },
+    section: { type: String, required: true },
     password: { type: String, required: true },
-    referralCode: { type: String, unique: true },
+    referralCode: { type: String, required: true },
     emailCount: { type: Number, default: 0 },
+    ticketSold: { type: Number, default: 0 },
+    points: { type: Number, default: 0 }
   },
   {
     timestamps: true,
