@@ -50,11 +50,12 @@ export default async function Dashboard() {
         <UserStats referralCode={user.referralCode} emailCount={user.emailCount} />
       </div>
 
-      {/* Move the "Add New Email" section below */}
       <div className="max-w-md mx-auto space-y-4">
         <h2 className="text-2xl font-bold text-center">Add New Email</h2>
         <EmailForm />
       </div>
+
+      {/* Remove the file upload section */}
     </main>
   );
 }
