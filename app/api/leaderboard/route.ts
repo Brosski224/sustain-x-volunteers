@@ -1,25 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextApiRequest, NextApiResponse } from "next";
 import connectDB from "@/lib/db";
-import { User } from "@/lib/models/user";
+import { Leaderboard } from "@/lib/models/leaderboard";
 
-export async function GET() {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  await connectDB();
+
   try {
-    await connectDB();
-
-    const users = await User.find({}, 'name department section emailCount ticketSold points');
-
-    const leaderboardData = users.map((user) => ({
-      name: user.name,
-      department: user.department,
-      section: user.section,
-      emailCount: user.emailCount || 0,
-      ticketSold: user.ticketSold || 0,
-      points: user.points || 0,
-    }));
-
-    return NextResponse.json(leaderboardData);
+    const leaderboardData = await Leaderboard.find().sort({ score: -1 }).limit(10);
+    res.status(200).json(leaderboardData);
   } catch (error) {
-    console.error("Leaderboard error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    res.status(500).json({ error: "Failed to fetch leaderboard data" });
   }
 }
