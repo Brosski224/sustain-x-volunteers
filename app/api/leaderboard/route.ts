@@ -4,7 +4,10 @@ import { User } from "@/lib/models/user";
 
 export async function GET() {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) {
+      throw new Error("Database connection failed");
+    }
 
     const users = await User.find();
 
