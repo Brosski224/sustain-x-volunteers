@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await connectDB();
 
-    const users = await User.find({}, 'name department section emailCount ticketSold points');
+    const users = await User.find();
 
     const leaderboardData = users.map((user) => ({
       name: user.name,
