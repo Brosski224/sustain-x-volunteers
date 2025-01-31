@@ -1,12 +1,8 @@
-"use client"
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/login-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 
 export default function Home() {
-  
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-4">
@@ -14,17 +10,6 @@ export default function Home() {
           <h1 className="text-3xl font-bold">SustainX</h1>
           <p className="text-muted-foreground">Login to access your dashboard</p>
         </div>
-
-        <form >
-          <div className="text-center space-y-4">
-          <Link href="/leaderboard">            
-            <Button type="submit" >
-              {"Show Leaderboard"}
-            </Button>
-            </Link>
-          </div>
-        </form>
-   
         <LoginForm />
         <p className="text-center text-sm text-muted-foreground">
           Don't have an account?{" "}
@@ -34,6 +19,11 @@ export default function Home() {
             </Button>
           </Link>
         </p>
+        <div className="text-center">
+          <Link href="/leaderboard">
+            <Button variant="primary">Show Leaderboard</Button>
+          </Link>
+        </div>
       </div>
     </main>
   );
