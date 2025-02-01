@@ -23,29 +23,34 @@ export default function Leaderboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResult, setShowSearchResult] = useState(false);
 
-  useEffect(() => {
-    async function fetchLeaderboardData() {
-      try {
-        const response = await fetch("/api/leaderboard");
-        const data = await response.json();
-        setLeaderboardData(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch leaderboard data:", error);
-        setLoading(false);
-      }
+  const fetchLeaderboardData = async () => {
+    try {
+      const response = await fetch(`/api/leaderboard?timestamp=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
+      });
+
+      const data = await response.json();
+      setLeaderboardData(data);
+    } catch (error) {
+      console.error("Failed to fetch leaderboard data:", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchLeaderboardData();
   }, []);
 
   const rankData = (data: LeaderboardEntry[], key: keyof LeaderboardEntry) => {
-    return data
+    return [...data]
       .sort((a, b) => b[key] - a[key])
       .map((entry, index) => ({ ...entry, rank: index + 1 }));
   };
 
-  const rankedEmailData = rankData([...leaderboardData], "emailCount");
-  const rankedTicketData = rankData([...leaderboardData], "ticketSold");
+  const rankedEmailData = rankData(leaderboardData, "emailCount");
+  const rankedTicketData = rankData(leaderboardData, "ticketSold");
   const sections = ["Sponsorship", "Outreach", "Curation", "Event", "Ambience"];
   const rankedSectionData = sections.reduce((acc, section) => {
     acc[section] = rankData(
@@ -57,7 +62,6 @@ export default function Leaderboard() {
 
   const searchResults = useMemo(() => {
     if (!searchQuery) return [];
-
     const query = searchQuery.toLowerCase().trim();
     return leaderboardData.filter(
       (entry) =>
@@ -77,9 +81,7 @@ export default function Leaderboard() {
     setShowSearchResult(false);
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  if (loading) return <p>Loading...</p>;
 
   return (
     <main className="container mx-auto p-4 space-y-8">
@@ -98,9 +100,7 @@ export default function Leaderboard() {
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
-              if (!e.target.value) {
-                setShowSearchResult(false);
-              }
+              if (!e.target.value) setShowSearchResult(false);
             }}
             className="flex-1"
           />
@@ -116,21 +116,10 @@ export default function Leaderboard() {
             <div className="space-y-4">
               {searchResults.slice(0, 3).map((result, index) => (
                 <div key={result.name} className="p-4 bg-gray-100 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-sm font-semibold">Search Result {index + 1}:</h3>
-                      <p className="text-sm font-medium mt-1">{result.name}</p>
-                      <p className="text-xs text-gray-400">{result.department}</p>
-                      <p className="text-xs text-gray-400">{result.section}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-green-400">
-                        {result.emailCount > 0 ? `Emails: ${result.emailCount}` : ""}
-                        {result.ticketSold > 0 ? `Tickets: ${result.ticketSold}` : ""}
-                        {result.points > 0 ? `Points: ${result.points}` : ""}
-                      </p>
-                    </div>
-                  </div>
+                  <h3 className="text-sm font-semibold">Search Result {index + 1}:</h3>
+                  <p className="text-sm font-medium mt-1">{result.name}</p>
+                  <p className="text-xs text-gray-400">{result.department}</p>
+                  <p className="text-xs text-gray-400">{result.section}</p>
                 </div>
               ))}
             </div>
@@ -145,95 +134,59 @@ export default function Leaderboard() {
         </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Emails Added</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-2 py-1 text-left">Rank</th>
-                <th className="px-2 py-1 text-left">Name</th>
-                <th className="px-2 py-1 text-left">Department</th>
-                <th className="px-2 py-1 text-left">Section</th>
-                <th className="px-2 py-1 text-left">Emails</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rankedEmailData.map((entry) => (
-                <tr key={entry.name}>
-                  <td className="px-2 py-1">{entry.rank}</td>
-                  <td className="px-2 py-1">{entry.name}</td>
-                  <td className="px-2 py-1">{entry.department}</td>
-                  <td className="px-2 py-1">{entry.section}</td>
-                  <td className="px-2 py-1">{entry.emailCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Tickets Sold</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-2 py-1 text-left">Rank</th>
-                <th className="px-2 py-1 text-left">Name</th>
-                <th className="px-2 py-1 text-left">Department</th>
-                <th className="px-2 py-1 text-left">Section</th>
-                <th className="px-2 py-1 text-left">Tickets</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rankedTicketData.map((entry) => (
-                <tr key={entry.name}>
-                  <td className="px-2 py-1">{entry.rank}</td>
-                  <td className="px-2 py-1">{entry.name}</td>
-                  <td className="px-2 py-1">{entry.department}</td>
-                  <td className="px-2 py-1">{entry.section}</td>
-                  <td className="px-2 py-1">{entry.ticketSold}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+      <LeaderboardTable title="Emails Added" data={rankedEmailData} field="emailCount" />
+      <LeaderboardTable title="Tickets Sold" data={rankedTicketData} field="ticketSold" />
 
       {sections.map((section) => (
-        <Card key={section}>
-          <CardHeader>
-            <CardTitle>{section} Points</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <table className="w-full table-auto">
-              <thead>
-                <tr>
-                  <th className="px-2 py-1 text-left">Rank</th>
-                  <th className="px-2 py-1 text-left">Name</th>
-                  <th className="px-2 py-1 text-left">Department</th>
-                  <th className="px-2 py-1 text-left">Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rankedSectionData[section].map((entry) => (
-                  <tr key={entry.name}>
-                    <td className="px-2 py-1">{entry.rank}</td>
-                    <td className="px-2 py-1">{entry.name}</td>
-                    <td className="px-2 py-1">{entry.department}</td>
-                    <td className="px-2 py-1">{entry.points}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
+        <LeaderboardTable
+          key={section}
+          title={`${section} Points`}
+          data={rankedSectionData[section]}
+          field="points"
+        />
       ))}
     </main>
+  );
+}
+
+function LeaderboardTable({
+  title,
+  data,
+  field,
+}: {
+  title: string;
+  data: LeaderboardEntry[];
+  field: keyof LeaderboardEntry;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <table className="w-full table-auto">
+          <thead>
+            <tr>
+              <th className="px-2 py-1 text-left">Rank</th>
+              <th className="px-2 py-1 text-left">Name</th>
+              <th className="px-2 py-1 text-left">Department</th>
+              <th className="px-2 py-1 text-left">Section</th>
+              <th className="px-2 py-1 text-left">{field.charAt(0).toUpperCase() + field.slice(1)}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((entry) => (
+              <tr key={entry.name}>
+                <td className="px-2 py-1">{entry.rank}</td>
+                <td className="px-2 py-1">{entry.name}</td>
+                <td className="px-2 py-1">{entry.department}</td>
+                <td className="px-2 py-1">{entry.section}</td>
+                <td className="px-2 py-1">{entry[field]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
   );
 }

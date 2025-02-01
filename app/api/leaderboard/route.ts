@@ -4,12 +4,9 @@ import { User } from "@/lib/models/user";
 
 export async function GET() {
   try {
-    const db = await connectDB();
-    if (!db) {
-      throw new Error("Database connection failed");
-    }
+    await connectDB();
 
-    const users = await User.find();
+    const users = await User.find().lean();
 
     const leaderboardData = users.map((user) => ({
       name: user.name,
@@ -20,9 +17,16 @@ export async function GET() {
       points: user.points || 0,
     }));
 
-    return NextResponse.json(leaderboardData);
+    return NextResponse.json(leaderboardData, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+      },
+    });
   } catch (error) {
     console.error("Leaderboard error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
