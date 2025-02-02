@@ -12,7 +12,7 @@ export function RegisterForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const sections = ["Sponsorship", "Outreach", "Curation", "Event", "Ambience"] as const;
+  const sections = ["Sponsorship", "Outreach", "Curation", "Event and Ambience"] as const;
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -51,7 +51,7 @@ export default function Leaderboard() {
 
   const rankedEmailData = rankData(leaderboardData, "emailCount");
   const rankedTicketData = rankData(leaderboardData, "ticketSold");
-  const sections = ["Sponsorship", "Outreach", "Curation", "Event", "Ambience"];
+  const sections = ["Sponsorship", "Outreach", "Curation", "Event and Ambience"];
   const rankedSectionData = sections.reduce((acc, section) => {
     acc[section] = rankData(
       leaderboardData.filter((entry) => entry.section === section),
@@ -85,11 +85,16 @@ export default function Leaderboard() {
 
   return (
     <main className="container mx-auto p-4 space-y-8">
-      <div className="text-center mb-4">
-        <Link href="/">
-          <Button variant="link">Back to Home</Button>
-        </Link>
-      </div>
+              <form>
+          <div className="text-center space-y-4">
+            <Link href="/">
+              <Button type="submit">
+                {"Back To Home"}
+              </Button>
+            </Link>
+          </div>
+        </form>
+
       <h1 className="text-3xl font-bold text-center">Leaderboard</h1>
 
       <div className="mb-6">
