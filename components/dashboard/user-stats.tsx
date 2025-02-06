@@ -5,21 +5,22 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 
 interface UserStatsProps {
-  referralCode: string
   emailCount: number
 }
 
-export function UserStats({ referralCode, emailCount }: UserStatsProps) {
+export function UserStats({ emailCount }: UserStatsProps) {
   const router = useRouter()
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Your Referral Code</CardTitle>
+          <CardTitle className="text-lg">Join as Campus Ambassador</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold">{referralCode}</p>
+          <Button onClick={() => router.push("https://sustainx.vercel.app/")}>
+            Join Now
+          </Button>
         </CardContent>
       </Card>
       <Card>
@@ -30,7 +31,6 @@ export function UserStats({ referralCode, emailCount }: UserStatsProps) {
           <p className="text-3xl font-bold">{emailCount}</p>
         </CardContent>
       </Card>
-
     </div>
   )
 }
