@@ -140,7 +140,7 @@ export default function Leaderboard() {
       )}
 
       <LeaderboardTable title="Emails Added" data={rankedEmailData} field="emailCount" />
-      <LeaderboardTable title="Tickets Sold" data={rankedTicketData} field="ticketSold" />
+    
 
       {sections.map((section) => (
         <LeaderboardTable
