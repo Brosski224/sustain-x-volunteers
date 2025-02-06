@@ -6,36 +6,67 @@ import { User } from "@/lib/models/user";
 
 export async function POST(req: Request) {
   try {
+    // Get the auth token from cookies
     const token = req.cookies.get("auth-token");
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Verify the token to get the user payload
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!);
     const { payload } = await jwtVerify(token.value, secret);
-    const { email } = await req.json();
+
+    // Parse the incoming request body
+    const { emails } = await req.json();
+
+    // Ensure emails is an array
+    if (!Array.isArray(emails) || emails.length === 0) {
+      return NextResponse.json({ error: "No emails provided" }, { status: 400 });
+    }
 
     await connectDB();
     console.log("Connected to database");
 
-    // Check for duplicate email
-    const existingEmail = await Email.findOne({ email });
-    if (existingEmail) {
-      return NextResponse.json({ error: "Email already exists" }, { status: 400 });
+    // Create an array to track the results for each email
+    const addedEmails = [];
+    const duplicateEmails = [];
+
+    // Process each email
+    for (let email of emails) {
+      // Trim spaces and ensure the email is valid
+      email = email.trim();
+      if (!email) continue; // Skip empty emails
+
+      // Check for duplicate email
+      const existingEmail = await Email.findOne({ email });
+      if (existingEmail) {
+        duplicateEmails.push(email); // Track duplicates
+        continue;
+      }
+
+      // Create a new email entry
+      await Email.create({
+        email,
+        submittedBy: payload.userId,
+      });
+      addedEmails.push(email); // Track successfully added emails
     }
 
-    // Create new email entry
-    await Email.create({
-      email,
-      submittedBy: payload.userId,
+    // Update the user's email count based on the added emails
+    if (addedEmails.length > 0) {
+      await User.findByIdAndUpdate(payload.userId, {
+        $inc: { emailCount: addedEmails.length },
+      });
+    }
+
+    // Log results and respond with success
+    console.log("Email(s) added successfully:", addedEmails);
+
+    return NextResponse.json({
+      message: "Emails added successfully",
+      addedEmails,
+      duplicateEmails,
     });
-
-    // Update user's email count
-    await User.findByIdAndUpdate(payload.userId, { $inc: { emailCount: 1 } });
-
-    console.log("Email added successfully");
-
-    return NextResponse.json({ message: "Email added successfully" });
   } catch (error) {
     console.error("Email submission error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
