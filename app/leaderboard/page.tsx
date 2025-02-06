@@ -25,12 +25,18 @@ export default function Leaderboard() {
 
   const fetchLeaderboardData = async () => {
     try {
+      console.log("Fetching leaderboard data...");
       const response = await fetch(`/api/leaderboard?timestamp=${Date.now()}`, {
         cache: "no-store",
         headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
       });
 
+      if (!response.ok) {
+        throw new Error(`Error fetching leaderboard data: ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log("Leaderboard data fetched:", data);
       setLeaderboardData(data);
     } catch (error) {
       console.error("Failed to fetch leaderboard data:", error);
@@ -85,15 +91,15 @@ export default function Leaderboard() {
 
   return (
     <main className="container mx-auto p-4 space-y-8">
-              <form>
-          <div className="text-center space-y-4">
-            <Link href="/">
-              <Button type="submit">
-                {"Back To Home"}
-              </Button>
-            </Link>
-          </div>
-        </form>
+      <form>
+        <div className="text-center space-y-4">
+          <Link href="/">
+            <Button type="submit">
+              {"Back To Home"}
+            </Button>
+          </Link>
+        </div>
+      </form>
 
       <h1 className="text-3xl font-bold text-center">Leaderboard</h1>
 
@@ -140,7 +146,6 @@ export default function Leaderboard() {
       )}
 
       <LeaderboardTable title="Emails Added" data={rankedEmailData} field="emailCount" />
-    
 
       {sections.map((section) => (
         <LeaderboardTable
