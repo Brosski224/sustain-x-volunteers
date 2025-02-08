@@ -26,12 +26,14 @@ export async function POST(req: Request) {
 
     // Find user by email
     const user = await User.findOne({ email }).lean();
-    if (!user) {
+    
+    // Ensure user is an object, not an array
+    if (!user || Array.isArray(user)) {
       console.warn("🔴 User not found:", email);
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    console.log("🟢 User found:", user.email);
+    console.log("🟢 User found:", user?.email);
 
     // Verify password
     const isValid = await verifyPassword(password, user.password);
