@@ -15,6 +15,7 @@ export async function GET() {
       department: user.department,
       section: user.section,
       emailCount: user.emailCount || 0,
+      ticketSold: user.ticketSold || 0,
       points: user.points || 0,
     }));
 

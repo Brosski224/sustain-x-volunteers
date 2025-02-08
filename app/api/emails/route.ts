@@ -54,9 +54,20 @@ export async function POST(req: Request) {
 
     // Update the user's email count based on the added emails
     if (addedEmails.length > 0) {
-      await User.findByIdAndUpdate(payload.userId, {
-        $inc: { emailCount: addedEmails.length },
-      });
+      const user = await User.findByIdAndUpdate(
+        payload.userId,
+        { $inc: { emailCount: addedEmails.length } },
+        { new: true }
+      );
+
+      if (!user) {
+        return NextResponse.json(
+          { error: "User not found" },
+          { status: 404 }
+        );
+      }
+
+      console.log("Email count updated for user:", user.name);
     }
 
     // Log results and respond with success
