@@ -9,6 +9,7 @@ export async function POST(req: Request) {
     // Get the auth token from cookies
     const token = req.cookies.get("auth-token");
     if (!token) {
+      console.log("No auth token found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -21,6 +22,7 @@ export async function POST(req: Request) {
 
     // Ensure emails is an array
     if (!Array.isArray(emails) || emails.length === 0) {
+      console.log("No emails provided");
       return NextResponse.json({ error: "No emails provided" }, { status: 400 });
     }
 
@@ -61,6 +63,7 @@ export async function POST(req: Request) {
       );
 
       if (!user) {
+        console.log("User not found");
         return NextResponse.json(
           { error: "User not found" },
           { status: 404 }
