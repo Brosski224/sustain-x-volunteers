@@ -1,9 +1,13 @@
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   async redirects() {
     return [
       // ...existing redirects...
       // Ensure there are no redirects affecting /api/leaderboard
     ];
   },
-  // ...existing code...
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  // ...existing config...
 };
+
+module.exports = nextConfig;

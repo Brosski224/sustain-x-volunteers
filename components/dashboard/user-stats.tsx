@@ -32,16 +32,7 @@ export function UserStats({ emailCount = 0, referralCode }: UserStatsProps) {
           <p className="text-3xl font-bold">{emailCount}</p>
         </CardContent>
       </Card>
-      {referralCode && ( // ✅ Conditionally display referralCode if it exists
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Referral Code</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{referralCode}</p>
-          </CardContent>
-        </Card>
-      )}
+      
     </div>
   );
 }
