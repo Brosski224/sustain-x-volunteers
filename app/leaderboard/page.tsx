@@ -51,7 +51,7 @@ export default function Leaderboard() {
 
   const rankData = (data: LeaderboardEntry[], key: keyof LeaderboardEntry) => {
     return [...data]
-      .sort((a, b) => b[key] - a[key])
+      .sort((a, b) => (Number(b[key]) || 0) - (Number(a[key]) || 0))
       .map((entry, index) => ({ ...entry, rank: index + 1 }));
   };
 

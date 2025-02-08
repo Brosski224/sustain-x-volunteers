@@ -1,15 +1,16 @@
-"use client"
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+"use client"; // Add this line to mark the component as a client component
 
 interface UserStatsProps {
-  emailCount: number
+  emailCount?: number;
+  referralCode?: string; // ✅ Added referralCode
 }
 
-export function UserStats({ emailCount }: UserStatsProps) {
-  const router = useRouter()
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation"; // ✅ Correct
+
+export function UserStats({ emailCount = 0, referralCode }: UserStatsProps) {
+  const router = useRouter();
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -31,7 +32,16 @@ export function UserStats({ emailCount }: UserStatsProps) {
           <p className="text-3xl font-bold">{emailCount}</p>
         </CardContent>
       </Card>
+      {referralCode && ( // ✅ Conditionally display referralCode if it exists
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Referral Code</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">{referralCode}</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
-  )
+  );
 }
-

@@ -4,11 +4,10 @@ import { redirect } from "next/navigation";
 import { UserStats } from "@/components/dashboard/user-stats";
 import { EmailForm } from "@/components/dashboard/email-form";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
-import { User } from "@/lib/models/user";
 import connectDB from "@/lib/db";
-import { UserModel } from "@/types/user";
+import { IUser, User } from "@/lib/models/user";
 
-async function getUser(): Promise<UserModel | null> {
+async function getUser(): Promise<IUser | null> {
   const token = cookies().get("auth-token");
   if (!token) return redirect("/login");
 
@@ -47,7 +46,7 @@ export default async function Dashboard() {
           <h1 className="text-3xl font-bold">Welcome, {user.name}</h1>
           <LogoutButton />
         </div>
-        <UserStats referralCode={user.referralCode} emailCount={user.emailCount} />
+        <UserStats referralCode={user.referralCode} emailCount={user.emailCount ?? 0} />
       </div>
 
       {/* Move the "Add New Email" section below */}

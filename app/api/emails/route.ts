@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import connectDB from "@/lib/db";
 import { Email } from "@/lib/models/email";
@@ -6,8 +7,8 @@ import { User } from "@/lib/models/user";
 
 export async function POST(req: Request) {
   try {
-    // Get the auth token from cookies
-    const token = req.cookies.get("auth-token");
+    const token = cookies().get("auth-token");
+    // const token = req.cookies.get("auth-token"); // Removed incorrect line
     if (!token) {
       console.log("No auth token found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
