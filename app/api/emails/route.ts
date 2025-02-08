@@ -58,6 +58,7 @@ export async function POST(req: Request) {
     // Update the user's email count based on the added emails
     if (addedEmails.length > 0) {
 <<<<<<< HEAD
+<<<<<<< HEAD
       const user = await User.findByIdAndUpdate(
         payload.userId,
         { $inc: { emailCount: addedEmails.length } },
@@ -73,6 +74,11 @@ export async function POST(req: Request) {
       }
 
       console.log("Email count updated for user:", user.name);
+=======
+      await User.findByIdAndUpdate(payload.userId, {
+        $inc: { emailCount: addedEmails.length },
+      });
+>>>>>>> parent of 4f2e279 (emails)
 =======
       await User.findByIdAndUpdate(payload.userId, {
         $inc: { emailCount: addedEmails.length },
