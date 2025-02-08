@@ -1,48 +1,78 @@
-import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
-import { SignJWT } from "jose"
-import connectDB from "@/lib/db"
-import { User } from "@/lib/models/user"
-import { verifyPassword } from "@/lib/auth"
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { SignJWT } from "jose";
+import connectDB from "@/lib/db";
+import { User } from "@/lib/models/user";
+import { verifyPassword } from "@/lib/auth";
 
-const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!)
+const secretKey = process.env.NEXTAUTH_SECRET;
+if (!secretKey) {
+  throw new Error("NEXTAUTH_SECRET is missing from environment variables.");
+}
+
+const secret = new TextEncoder().encode(secretKey);
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json()
+    console.log("🔵 Received login request");
 
-    await connectDB()
+    // Parse request body
+    const { email, password } = await req.json();
+    console.log("🟢 Parsed request body:", { email });
 
-    const user = await User.findOne({ email })
+    // Connect to database
+    await connectDB();
+    console.log("🟢 Database connected");
+
+    // Find user by email
+    const user = await User.findOne({ email }).lean();
     if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+      console.warn("🔴 User not found:", email);
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    const isValid = await verifyPassword(password, user.password)
+    console.log("🟢 User found:", user.email);
+
+    // Verify password
+    const isValid = await verifyPassword(password, user.password);
     if (!isValid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+      console.warn("🔴 Incorrect password for:", email);
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // Create JWT token
-    const token = await new SignJWT({
-      userId: user._id,
-      email: user.email,
-      name: user.name,
-      section: user.section,
-    })
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("24h")
-      .sign(secret)
+    console.log("🟢 Password verification successful");
 
-    // Set cookie
+    // Generate JWT Token
+    console.log("🟡 Creating JWT token...");
+    let token;
+    try {
+      token = await new SignJWT({
+        userId: user._id,
+        email: user.email,
+        name: user.name,
+        section: user.section,
+      })
+        .setProtectedHeader({ alg: "HS256" })
+        .setExpirationTime("24h")
+        .sign(secret);
+      console.log("🟢 JWT token created successfully");
+    } catch (jwtError) {
+      console.error("🔴 JWT Signing Error:", jwtError);
+      return NextResponse.json({ error: "Token generation failed" }, { status: 500 });
+    }
+
+    // Set auth-token as a cookie
     cookies().set("auth-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24, // 24 hours
-    })
+    });
 
-    return NextResponse.json({
+    console.log("🟢 Auth token set in cookie");
+
+    // Prepare response
+    const responseData = {
       user: {
         id: user._id,
         name: user.name,
@@ -50,10 +80,13 @@ export async function POST(req: Request) {
         section: user.section,
         referralCode: user.referralCode,
       },
-    })
+    };
+
+    console.log("🟢 Sending response:", responseData);
+
+    return NextResponse.json(responseData);
   } catch (error) {
-    console.error("Login error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("🔴 Login error:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-
